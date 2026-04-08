@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Cat Wiggle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Prevent text selection while playing */
+        }
+
+        body {
+            font-family: 'Mali', cursive; /* Cute Thai-friendly web font */
+            background: linear-gradient(135deg, #FFE6E6, #FFB6C1);
+            color: #555;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+            width: 100%;
+            max-width: 450px; /* Portrait narrower width */
+            min-height: 750px; /* Taller height */
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #FF6B81;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #FFF, 4px 4px 0px rgba(255,107,129,0.2);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #FF6B81;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Mali', cursive;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(255, 107, 129, 0.4);
+        }
+
+        .btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            background-color: #FF4757;
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            flex: 1;
+            width: 100%;
+        }
+
+        #start-screen, #end-screen {
+            justify-content: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Game Screen specific */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FF6B81;
+            margin-bottom: 20px;
+        }
+
+        .cat-area {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            min-height: 550px;
+        }
+
+        .cat-head {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FAFAFA;
+            border: none;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            cursor: grab;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .cat-head:active {
+            cursor: grabbing;
+        }
+
+        .cat-head img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+            display: none;
+            pointer-events: none;
+        }
+        
+        .cat-head.has-image img {
+            display: block;
+        }
+        
+        .cat-head.has-image {
+            border: none; /* Remove placeholder border when image is set */
+            background-color: transparent;
+            font-size: 0;
+            box-shadow: none;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 1.5rem;
+            animation: floatUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        /* End Screen specific */
+        .final-score {
+            font-size: 4rem;
+            color: #FF4757;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+        
+        .screenshot-msg {
+            background: #FFF0F5;
+            border: 2px dashed #FF6B81;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: #FF4757;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1>Happy Cat Wiggle</h1>
+            <p>🐱 เกมคลิกค้างแล้วส่ายเมาส์ซ้าย-ขวาให้เร็วที่สุด! 🐱<br>คุณมีเวลาทำคะแนนแค่ 15 วินาทีเท่านั้น</p>
+            <button class="btn" onclick="startGame()">เริ่มเล่นเลย!</button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div>เวลา: <span id="time-display">15</span>s</div>
+                <div>คะแนน: <span id="score-display">0</span></div>
+            </div>
+            <div class="cat-area" id="cat-area">
+                <div class="cat-head has-image" id="cat-head">
+                    <img src="cat.jpg" alt="Cat Head" draggable="false" style="object-fit: cover;">
+                </div>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="screen">
+            <h1>หมดเวลา!</h1>
+            <p>คะแนนรวมของคุณคือ</p>
+            <div class="final-score" id="final-score-display">0</div>
+            <div class="screenshot-msg">📸 กดแคปหน้าจอนี้เอาไปขิงเพื่อนด่วน! 📸</div>
+            <button class="btn" style="background-color: #7BED9F; color: #2F3542;" onclick="showStartScreen()">เล่นอีกครั้ง</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            game: document.getElementById('game-screen'),
+            end: document.getElementById('end-screen')
+        };
+        const displays = {
+            time: document.getElementById('time-display'),
+            score: document.getElementById('score-display'),
+            finalScore: document.getElementById('final-score-display')
+        };
+        const catHead = document.getElementById('cat-head');
+        const catArea = document.getElementById('cat-area');
+
+        // Game Variables
+        let score = 0;
+        let timeLeft = 15;
+        let isGameRunning = false;
+        let timerInterval = null;
+
+        // Wiggle Detection Variables
+        let isMouseDown = false;
+        let lastMouseX = 0;
+        let lastDirection = 0; // 1 for right, -1 for left
+        const WIGGLE_THRESHOLD = 20; // minimal distance to count as a wiggle step
+        
+        const PARTICLE_EMOJIS = ['❤️', '💖', '✨', '🐾'];
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function showStartScreen() {
+            switchScreen('start');
+        }
+
+        function startGame() {
+            // Reset state
+            score = 0;
+            timeLeft = 15;
+            isGameRunning = true;
+            isMouseDown = false;
+            lastDirection = 0;
+            
+            displays.score.textContent = score;
+            displays.time.textContent = timeLeft;
+            
+            switchScreen('game');
+
+            // Start Timer
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                displays.time.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(timerInterval);
+            isMouseDown = false; // Reset mouse state
+            
+            displays.finalScore.textContent = score;
+            switchScreen('end');
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random Emoji
+            particle.textContent = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)];
+            
+            // Position near the mouse/cat head, adding slight random offset
+            const offsetX = (Math.random() - 0.5) * 50;
+            const offsetY = (Math.random() - 0.5) * 50;
+            
+            particle.style.left = (x + offsetX) + 'px';
+            particle.style.top = (y + offsetY) + 'px';
+            
+            document.body.appendChild(particle); // Append to body so it floats over everything
+            
+            // Remove after animation (1s)
+            setTimeout(() => {
+                document.body.removeChild(particle);
+            }, 1000);
+        }
+
+        // --- Interaction Logic (Mouse & Touch) ---
+
+        function handleStart(clientX) {
+            if (!isGameRunning) return;
+            isMouseDown = true;
+            lastMouseX = clientX;
+        }
+
+        function handleEnd() {
+             if (!isGameRunning) return;
+             isMouseDown = false;
+        }
+
+        function handleMove(clientX, clientY) {
+            if (!isGameRunning || !isMouseDown) return;
+
+            const currentX = clientX;
+            const deltaX = currentX - lastMouseX;
+
+            // Check if horizontal movement crossed the threshold
+            if (Math.abs(deltaX) >= WIGGLE_THRESHOLD) {
+                const currentDirection = Math.sign(deltaX);
+
+                if (currentDirection !== lastDirection) {
+                    score++;
+                    displays.score.textContent = score;
+                    createParticle(clientX, clientY);
+                    lastDirection = currentDirection;
+                    lastMouseX = currentX;
+                }
+            }
+        }
+
+        // 1. Mouse Events (PC)
+        catHead.addEventListener('mousedown', (e) => handleStart(e.clientX));
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+
+        // 2. Touch Events (Mobile)
+        catHead.addEventListener('touchstart', (e) => {
+            if (isGameRunning) e.preventDefault(); // Prevent screen scrolling when touching cat
+            handleStart(e.touches[0].clientX);
+        }, { passive: false });
+
+        window.addEventListener('touchend', handleEnd);
+
+        window.addEventListener('touchmove', (e) => {
+            if (isGameRunning && isMouseDown) e.preventDefault(); // Prevent screen from dragging around
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        // Prevent dragging image globally to not break mouse detection
+        document.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+
+    </script>
+</body>
+</html>
