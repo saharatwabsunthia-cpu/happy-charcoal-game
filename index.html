@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +12,13 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* Prevent text selection while playing */
+            user-select: none;
+            /* Prevent text selection while playing */
         }
 
         body {
-            font-family: 'Mali', cursive; /* Cute Thai-friendly web font */
+            font-family: 'Mali', cursive;
+            /* Cute Thai-friendly web font */
             background: linear-gradient(135deg, #FFE6E6, #FFB6C1);
             color: #555;
             height: 100vh;
@@ -30,8 +33,10 @@
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
             width: 100%;
-            max-width: 450px; /* Portrait narrower width */
-            min-height: 750px; /* Taller height */
+            max-width: 450px;
+            /* Portrait narrower width */
+            min-height: 750px;
+            /* Taller height */
             padding: 30px;
             text-align: center;
             position: relative;
@@ -43,7 +48,7 @@
             color: #FF6B81;
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 0px #FFF, 4px 4px 0px rgba(255,107,129,0.2);
+            text-shadow: 2px 2px 0px #FFF, 4px 4px 0px rgba(255, 107, 129, 0.2);
         }
 
         p {
@@ -85,7 +90,8 @@
             width: 100%;
         }
 
-        #start-screen, #end-screen {
+        #start-screen,
+        #end-screen {
             justify-content: center;
         }
 
@@ -129,7 +135,7 @@
             align-items: center;
             font-size: 5rem;
             cursor: grab;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .cat-head:active {
@@ -144,13 +150,14 @@
             display: none;
             pointer-events: none;
         }
-        
+
         .cat-head.has-image img {
             display: block;
         }
-        
+
         .cat-head.has-image {
-            border: none; /* Remove placeholder border when image is set */
+            border: none;
+            /* Remove placeholder border when image is set */
             background-color: transparent;
             font-size: 0;
             box-shadow: none;
@@ -170,12 +177,13 @@
                 transform: translateY(0) scale(0.5);
                 opacity: 1;
             }
+
             100% {
                 transform: translateY(-100px) scale(1.5);
                 opacity: 0;
             }
         }
-        
+
         /* End Screen specific */
         .final-score {
             font-size: 4rem;
@@ -183,7 +191,7 @@
             font-weight: 700;
             margin: 20px 0;
         }
-        
+
         .screenshot-msg {
             background: #FFF0F5;
             border: 2px dashed #FF6B81;
@@ -193,16 +201,16 @@
             font-weight: bold;
             color: #FF4757;
         }
-
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <!-- START SCREEN -->
         <div id="start-screen" class="screen active">
-            <h1>Happy Cat Wiggle</h1>
-            <p>🐱 เกมคลิกค้างแล้วส่ายเมาส์ซ้าย-ขวาให้เร็วที่สุด! 🐱<br>คุณมีเวลาทำคะแนนแค่ 15 วินาทีเท่านั้น</p>
+            <h1>Happy charcoal Game</h1>
+            <p>🐱 เกมลูบหัวชาโคลซ้าย-ขวาให้เร็วที่สุด! 🐱<br>คุณมีเวลาทำคะแนนแค่ 15 วินาทีเท่านั้น</p>
             <button class="btn" onclick="startGame()">เริ่มเล่นเลย!</button>
         </div>
 
@@ -225,7 +233,8 @@
             <p>คะแนนรวมของคุณคือ</p>
             <div class="final-score" id="final-score-display">0</div>
             <div class="screenshot-msg">📸 กดแคปหน้าจอนี้เอาไปขิงเพื่อนด่วน! 📸</div>
-            <button class="btn" style="background-color: #7BED9F; color: #2F3542;" onclick="showStartScreen()">เล่นอีกครั้ง</button>
+            <button class="btn" style="background-color: #7BED9F; color: #2F3542;"
+                onclick="showStartScreen()">เล่นอีกครั้ง</button>
         </div>
     </div>
 
@@ -255,7 +264,7 @@
         let lastMouseX = 0;
         let lastDirection = 0; // 1 for right, -1 for left
         const WIGGLE_THRESHOLD = 20; // minimal distance to count as a wiggle step
-        
+
         const PARTICLE_EMOJIS = ['❤️', '💖', '✨', '🐾'];
 
         function switchScreen(screenName) {
@@ -274,10 +283,10 @@
             isGameRunning = true;
             isMouseDown = false;
             lastDirection = 0;
-            
+
             displays.score.textContent = score;
             displays.time.textContent = timeLeft;
-            
+
             switchScreen('game');
 
             // Start Timer
@@ -285,7 +294,7 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 displays.time.textContent = timeLeft;
-                
+
                 if (timeLeft <= 0) {
                     endGame();
                 }
@@ -296,7 +305,7 @@
             isGameRunning = false;
             clearInterval(timerInterval);
             isMouseDown = false; // Reset mouse state
-            
+
             displays.finalScore.textContent = score;
             switchScreen('end');
         }
@@ -304,19 +313,19 @@
         function createParticle(x, y) {
             const particle = document.createElement('div');
             particle.classList.add('particle');
-            
+
             // Random Emoji
             particle.textContent = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)];
-            
+
             // Position near the mouse/cat head, adding slight random offset
             const offsetX = (Math.random() - 0.5) * 50;
             const offsetY = (Math.random() - 0.5) * 50;
-            
+
             particle.style.left = (x + offsetX) + 'px';
             particle.style.top = (y + offsetY) + 'px';
-            
+
             document.body.appendChild(particle); // Append to body so it floats over everything
-            
+
             // Remove after animation (1s)
             setTimeout(() => {
                 document.body.removeChild(particle);
@@ -332,8 +341,8 @@
         }
 
         function handleEnd() {
-             if (!isGameRunning) return;
-             isMouseDown = false;
+            if (!isGameRunning) return;
+            isMouseDown = false;
         }
 
         function handleMove(clientX, clientY) {
@@ -381,4 +390,5 @@
 
     </script>
 </body>
+
 </html>
